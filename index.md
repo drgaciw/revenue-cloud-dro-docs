@@ -9,6 +9,7 @@ Each file is kept under ~200 lines, named by concern (not conversation), and tag
 - [dro-mapping.md](dro-mapping.md) — Commercial-to-technical decomposition, execution rules, attribute mapping, and line-item design. **Keywords:** decomposition, commercial product, technical product, execution rules, attribute mapping, fulfillment order line items, hybrid line design.
 - [fulfillment-orchestration.md](fulfillment-orchestration.md) — Step graph, dependencies, per-node failure handling, shallow-graph discipline, offline callout hold, fulfillment scenarios, and line-item sub-topic. **Keywords:** orchestration, step graph, dependencies, compensation, retry, line items, offline hold, fulfillment scenarios.
 - [decomposition-viewer.md](decomposition-viewer.md) — Pre-commit checkpoint UI for inspecting decomposition results before order commit. **Keywords:** decomposition viewer, validation, launch gate, human inspection.
+- [interface-coverage.md](interface-coverage.md) — CLI, API, Tooling API, and MCP reachability for RCA/RLM/DRO functions; which operations need browser automation and how to wrap them. **Keywords:** interface coverage, CLI, API, MCP, Tooling API, invocable actions, browser automation, reachability, agentic engineering.
 
 ## Entitlements, licensing, and access
 
