@@ -10,6 +10,7 @@ Each file is kept under ~200 lines, named by concern (not conversation), and tag
 - [fulfillment-orchestration.md](fulfillment-orchestration.md) — Step graph, dependencies, per-node failure handling, shallow-graph discipline, offline callout hold, fulfillment scenarios, and line-item sub-topic. **Keywords:** orchestration, step graph, dependencies, compensation, retry, line items, offline hold, fulfillment scenarios.
 - [decomposition-viewer.md](decomposition-viewer.md) — Pre-commit checkpoint UI for inspecting decomposition results before order commit. **Keywords:** decomposition viewer, validation, launch gate, human inspection.
 - [interface-coverage.md](interface-coverage.md) — CLI, API, Tooling API, and MCP reachability for RCA/RLM/DRO functions; which operations need browser automation and how to wrap them. **Keywords:** interface coverage, CLI, API, MCP, Tooling API, invocable actions, browser automation, reachability, agentic engineering.
+- [wrapper-patterns.md](wrapper-patterns.md) — Thin Apex/Flow/MCP wrappers that close the Tier 4 browser gaps: Tooling API facades, decomposition validation, step-graph builder from JSON, and governance. **Keywords:** wrappers, invocable methods, Tooling API, MCP tools, browser automation, agentic engineering, decomposition rules, fulfillment steps, validation, gap closure.
 
 ## Entitlements, licensing, and access
 
