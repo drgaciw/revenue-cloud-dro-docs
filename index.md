@@ -24,6 +24,7 @@ Each file is kept under ~200 lines, named by concern (not conversation), and tag
 ## Agentic and future topics
 
 - [agentic-dro.md](agentic-dro.md) — Agentic validation across decomposition, entitlements, OCI labels, and the audit chain. **Keywords:** agentic, Claude, skills, validation, OCI labels, agent harness.
+- [external-agentic-skills.md](external-agentic-skills.md) — Curated public GitHub repos with Claude Code skills for DRO and Revenue Cloud (lzdravkov/rlm-skills is the top match). **Keywords:** external skills, Claude Code, rlm-skills, DRO skill, agentic engineering, fulfillment callouts.
 - [chaos-testing.md](chaos-testing.md) — Failure injection to verify compensation, retries, and audit-trail behavior. **Keywords:** chaos, failure injection, resilience, compensation verification.
 - [nfr-parking-lot.md](nfr-parking-lot.md) — Performance, smoke, and remaining non-functional topics. **Keywords:** NFR, performance, smoke test, load.
 - [amendments-renewals.md](amendments-renewals.md) — Parked: amendments, renewals, cancellations flowing back to technical side. New logos only for now. **Keywords:** amendments, renewals, cancellation, parked.
