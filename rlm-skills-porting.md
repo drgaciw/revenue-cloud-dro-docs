@@ -1,10 +1,10 @@
 # Porting RLM Skills to Claude Format
 
-Assessment of porting bgaldino/rlm-base-dev (and similar RLM Cursor skills) into Claude Code `SKILL.md` format, including effort, risk, and recommendation.
+Assessment of porting bgaldino/rlm-base-dev (and similar RLM skills) into Claude Code `SKILL.md` format, including effort, risk, and recommendation. Claude Code is the preferred harness; Cursor is not in scope.
 
 ## Short answer
 
-**Yes, worth doing — but as a selective port, not a bulk conversion.** The skills are already plain markdown with no Cursor-specific dependencies, so the mechanical port is cheap. The value is in the schema grounding and skill-authoring patterns, not in the CCI/SFDMU-specific procedures.
+**Yes, worth doing — but as a selective port, not a bulk conversion.** The skills are already plain markdown with no editor-specific dependencies, so the mechanical port is cheap. The value is in the schema grounding and skill-authoring patterns, not in the CCI/SFDMU-specific procedures.
 
 ## Why it is feasible
 
@@ -33,7 +33,7 @@ Assessment of porting bgaldino/rlm-base-dev (and similar RLM Cursor skills) into
 ## Recommended porting approach
 
 1. **Select, don't bulk-convert.** Start with data-model, skill-authoring, and revenue-cloud-docs. Use `skill-port` for the mechanical frontmatter pass, then hand-edit descriptions for our trigger vocabulary.
-2. **Rewrite descriptions for Claude.** Cursor skills often assume file-glob injection; Claude relies on description matching. Add phrases like "use when validating DRO decomposition" or "use when authoring a fulfillment step."
+2. **Rewrite descriptions for Claude.** Claude relies on description matching. Add phrases like "use when validating DRO decomposition" or "use when authoring a fulfillment step."
 3. **Strip CCI/SFDMU assumptions.** Replace "run this CCI task" with "query the org via MCP/Tooling API" or "read the local metadata." Keep the object knowledge; drop the build-system coupling.
 4. **Add our proprietary layers on top.** Ported skills become the schema foundation. Custom skills (decomposition validator, entitlement auditor, OCI sync, wrapper author) sit above them and own the hundred-image, OCI-label, Sonatype logic.
 5. **Register in both indexes.** Update `.claude/skills` discovery and our `index.md` / `agentic-skills-inventory.md` so Claude routes correctly.
