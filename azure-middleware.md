@@ -9,6 +9,9 @@ Use a deterministic key: hash entitlement ID + customer ID + image version into 
 ## Durability and delivery
 Event Grid provides at-least-once delivery with a seven-day retry window but no ordering or exactly-once guarantee. Harden with a dead-letter queue on every subscription for exhausted retries, Service Bus queues (with sessions) for ordered steps, and dedupe on entitlement ID plus sequence number before writing to the audit log.
 
+## Offline coordination
+Coordinate with DRO's offline hold: when middleware or Nexus is unavailable, accept held steps, surface a clear recovery signal, and process the released batch with the same idempotency and compensation rules. Avoid duplicate grants by checking the audit system's state before replaying any held event.
+
 ## Compensation logic
 On transient failure after committed steps: revoke the token, emit a compensation event. On permanent failure: park for ops. The middleware owns the idempotency contract so retries are safe, not speculative.
 

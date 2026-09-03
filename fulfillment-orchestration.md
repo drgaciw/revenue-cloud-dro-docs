@@ -9,6 +9,12 @@ Keep the graph shallow: three to five nodes max per commercial product. Past tha
 ## Async callout pattern
 DRO fires an event with the entitlement JSON; middleware mints the token and grants access; the audit system records success or failure. DRO's fulfillment step completes on event dispatch, not on the downstream result. The audit system fills the "did it work" gap and is the better source of truth since it sees the actual download.
 
+## Offline / maintenance hold (recommendation)
+Use DRO's native offline support for callout steps. When Nexus or the middleware is down for maintenance, place those steps on hold rather than failing them, then release in controlled batches once the downstream system recovers. This prevents cascading failures and gives ops a clean resume point instead of replaying from scratch.
+
+## Fulfillment scenarios (recommendation)
+Consider reusable step groups that auto-attach based on product classification or commercial SKU. For a hundred-image catalog this can cut rule sprawl, but it adds another layer of indirection — treat scenarios as a second-class optimization only after the base graph is stable and tested. Validate any scenario-driven attachment in the Decomposition Viewer before launch.
+
 ## Compensation (recommendation)
 Automatic compensation, scoped to steps that actually committed, and only on transient failure. Token minted but grant failed → revoke the token, emit a compensation event the audit system logs. Permanent failures (malformed entitlement JSON, Nexus outage past retry) park for ops — auto-compensating bad input just loops. Rule of thumb: compensate what you can prove, escalate what you can't.
 

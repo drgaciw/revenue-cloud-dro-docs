@@ -7,7 +7,7 @@ Each file is kept under ~200 lines, named by concern (not conversation), and tag
 ## Core mapping and fulfillment
 
 - [dro-mapping.md](dro-mapping.md) — Commercial-to-technical decomposition, execution rules, attribute mapping, and line-item design. **Keywords:** decomposition, commercial product, technical product, execution rules, attribute mapping, fulfillment order line items, hybrid line design.
-- [fulfillment-orchestration.md](fulfillment-orchestration.md) — Step graph, dependencies, per-node failure handling, shallow-graph discipline, and line-item sub-topic. **Keywords:** orchestration, step graph, dependencies, compensation, retry, line items.
+- [fulfillment-orchestration.md](fulfillment-orchestration.md) — Step graph, dependencies, per-node failure handling, shallow-graph discipline, offline callout hold, fulfillment scenarios, and line-item sub-topic. **Keywords:** orchestration, step graph, dependencies, compensation, retry, line items, offline hold, fulfillment scenarios.
 - [decomposition-viewer.md](decomposition-viewer.md) — Pre-commit checkpoint UI for inspecting decomposition results before order commit. **Keywords:** decomposition viewer, validation, launch gate, human inspection.
 
 ## Entitlements, licensing, and access
@@ -18,7 +18,7 @@ Each file is kept under ~200 lines, named by concern (not conversation), and tag
 ## Systems and middleware
 
 - [audit-system.md](audit-system.md) — Audit microservice, event chain, negative events, compensation records, download receipts. **Keywords:** audit, events, receipt, negative events, compensation records.
-- [azure-middleware.md](azure-middleware.md) — Event Grid, Service Bus, async callout, idempotency, dead-letter queues, compensation logic, Key Vault. **Keywords:** middleware, Event Grid, Service Bus, idempotency, dead-letter, Key Vault, async callout.
+- [azure-middleware.md](azure-middleware.md) — Event Grid, Service Bus, async callout, idempotency, dead-letter queues, compensation logic, offline coordination, Key Vault. **Keywords:** middleware, Event Grid, Service Bus, idempotency, dead-letter, Key Vault, async callout, offline.
 - [observability.md](observability.md) — Grafana dashboards, correlation-driven views, alerting on fulfillment gaps. **Keywords:** observability, Grafana, correlation ID, alerting, dashboard.
 
 ## Agentic and future topics
