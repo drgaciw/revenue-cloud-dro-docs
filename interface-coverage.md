@@ -1,59 +1,107 @@
-# Interface Coverage: CLI, API, and MCP Reachability for RCA / RLM / DRO
+---
+title: "Interface Coverage for RCA and DRO"
+description: "Route each DRO task to a verified UI, SObject, invocable, Metadata API, CLI, Flow, or Hosted MCP interface and expose gaps explicitly."
+agent_use: "Load before promising that an agent can read, write, deploy, submit, or monitor a DRO capability."
+salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
+related: ["wrapper-patterns", "agentic-tooling", "decomposition-viewer"]
+last_reviewed: 2026-09-09
+sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5"]
+---
 
-**Keywords:** interface coverage, CLI, API, MCP, Tooling API, invocable actions, browser automation, agentic engineering, reachability, gaps
+## Purpose
 
-## Summary
-Most DRO design-time configuration is metadata-deployable and reachable via Salesforce CLI and Tooling API. Runtime fulfillment is reachable via invocable actions, Connect REST, and Submit API. However, several design-time and operational functions still require the browser UI or browser automation. This file maps the coverage and recommends how to close the gaps for agentic workflows.
+Prevent plausible but unsupported interface claims. Coverage is release- and org-dependent; confirm with official docs and target-org describe before coding.
 
-## Coverage tiers
+## When to use this doc (agent trigger conditions)
 
-### Tier 1 — Fully reachable (CLI + Tooling API + MCP)
-- Decomposition rules, fulfillment step definitions, scenarios, workspaces, integration definitions, value transformations, fallout/jeopardy rules, task assignment rules.
-- These are metadata types. `sf project deploy start` / retrieve works. Salesforce Hosted MCP servers (GA) can expose them via custom Apex or Named Queries.
-- New in Spring '26: `OrchestrationPlanCtxMapping` Tooling API object for context mapping entries.
+- “Can this be done with CLI/API/MCP?”
+- “Does this require Setup or the DRO UI?”
+- “How do we migrate this config?”
+- “What wrapper is needed?”
 
-### Tier 2 — Runtime reachable (Invocable Actions + Connect REST + Submit API)
-- Order submission to DRO (`Submit Sales Transaction` invocable action / Submit API).
-- Decomposition and orchestration as separate processes (individual invocable actions).
-- Callout step payloads (full hierarchy including bundle children) available for integration definitions.
-- Assetization and fulfillment status via standard objects + REST/SOQL.
-- Community licenses support "Submit orders to Dynamic Revenue Orchestrator."
+## Key concepts
 
-### Tier 3 — Partial / data-only (REST/SOQL, limited CLI)
-- Runtime fulfillment plans, steps, and status changes (monitor + manual status edits).
-- Product2, related products, queues, users — standard sObjects, reachable via Data API / SOQL but not as clean metadata packages for complex graphs.
-- Migration of rules between orgs: Data API (or Bulk API for high volume).
+- **Documented SObject:** exact API name appears in the object reference.
+- **Data migration:** ordered insert/update of configuration records.
+- **Metadata deployment:** deployable metadata; do not equate every configuration SObject with Metadata API.
+- **Hosted MCP:** configured server exposing approved SObject/Flow/invocable tools.
+- **UI-only/unknown:** no verified programmatic write interface in reviewed documentation.
 
-### Tier 4 — Browser / automation required
-- Visual plan editor in the fulfillment workspace (drag-and-drop step graphs, dependency wiring).
-- Decomposition Viewer (read-only inspection UI).
-- Some advanced configuration in Salesforce Go (feature toggles, dunning templates, future-dated steps unlock).
-- Manual task assignment UI and certain operator dashboards.
-- Any function not yet exposed as an invocable action or Tooling object.
+## Data model & objects
 
-## Recommendations for agentic engineering
+| Capability | Verified interface | Status |
+|---|---|---|
+| Query DRO standard objects | REST/SOQL after object/field describe | Verified object APIs |
+| Migrate selected design-time objects | Ordered data insert/update per deployment guide | Verified with constraints |
+| Submit order/sales transaction | DRO standard invocable actions | Verified category; exact action APIs require child-page check |
+| Expose global Apex invocable action | Hosted MCP custom server | Verified |
+| Deploy custom MCP server | Metadata API | Verified |
+| Reproduce all Decomposition Viewer columns | Not fully documented | Gap |
+| Write arbitrary DRO configuration via Tooling API | Not established | Gap |
 
-1. **Prefer metadata-first.** Keep decomposition rules, step definitions, scenarios, and integration definitions in source control. Agents (Claude Code + Salesforce DX MCP) can read, diff, propose, and deploy changes without touching the UI.
+## Flow / sequence
 
-2. **Wrap the Tier 4 gaps.** For the visual editor and Decomposition Viewer, build thin Apex `@InvocableMethod` or Flow wrappers that perform the equivalent create/update/validate operations. Expose those as Hosted MCP tools. This turns "browser required" into "agent callable."
+1. Classify operation as read, validate, configure, submit, monitor, or operate.
+2. Search official object/action/metadata reference.
+3. Confirm exact API and version in the target org.
+4. Select the least-privilege interface.
+5. If no interface is documented, keep it manual or build a supported thin wrapper.
 
-3. **Use the community MCP server as a starting point.** `MarijanMiletic/mcp_salesforce_revenue_cloud` (FastMCP) already exposes products, price books, quotes, orders, and arbitrary SOQL. Extend it with DRO-specific tools: list decomposition rules, fetch fulfillment step definitions, query orchestration plan status. This gives Claude Desktop / Cursor immediate read access.
+## APIs & extension points
 
-4. **Leverage the official rlm-skills.** `lzdravkov/rlm-skills` includes an `rlm-dynamic-revenue-orchestrator` skill covering fulfillment plans, callout provider types, platform events, and object references. Install it into your Claude Code / Cursor harness and point it at the wrappers from step 2.
+Use the documented object APIs only after confirming availability in the target org and API version. Query schema first; do not infer fields from labels.
 
-5. **Govern the write path.** Agents should propose changes (PR + metadata deploy) rather than mutate production rules directly. Use the same permission sets as humans: Fulfillment Designer for design-time, Submit Transactions for runtime. Never let an agent hold DRO Admin in a headless context.
+```bash
+sf org display --target-org "$ORG_ALIAS"
+sf data query --target-org "$ORG_ALIAS" --query "SELECT Id FROM FulfillmentPlan LIMIT 1" --json
+sf apex run test --target-org "$ORG_ALIAS" --test-level RunLocalTests --wait 30 --result-format json
+sf project deploy start --target-org "$ORG_ALIAS" --source-dir force-app --dry-run --test-level RunLocalTests
+```
 
-6. **Track the gap list.** Maintain a living table (below) of Tier 4 functions and the wrapper status. Revisit each release — Salesforce is actively adding Tooling objects and invocable actions (e.g., OrchestrationPlanCtxMapping, separate decompose/orchestrate actions).
+`sf project deploy start --dry-run` validates without saving; use `sf project deploy validate` when a validation job and later quick deploy are required ([Salesforce CLI](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)).
+Standard DRO invocable actions submit an order or sales transaction for fulfillment, but the parent page does not list individual API names ([developer guide](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm)). Fetch the child action page for the target API version before generating invocation payloads.
 
-## Gap table (living)
+## Configuration & metadata
 
-| Function | Current interface | Agent path today | Recommended wrapper |
-|---|---|---|---|
-| Visual step-graph editor | Browser UI | None | Apex/Flow: create step + dependency from JSON spec |
-| Decomposition Viewer | Browser UI (read-only) | SOQL on fulfillment objects | Apex: validate decomposition output vs entitlement JSON |
-| Salesforce Go feature toggles | Browser | None | Document manual; avoid automation |
-| Manual task reassignment | Browser | Limited | Flow: reassign by rule |
-| Rule migration between orgs | Data/Bulk API | Scriptable | Keep in DX project; deploy via CLI |
+Migration order and lookup dependencies for DRO configuration objects are documented separately from Metadata API. Treat `FulfillmentStepDefinitionGroup` → `FulfillmentStepDefinition` → `FulfillmentStepDependencyDef` and product/rule prerequisites as ordered data dependencies ([deployment reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm)).
 
-## Practical default for this project
-Start with Tier 1 + Tier 2 only. All decomposition rules, step definitions, scenarios, and callout integrations live in metadata and are agent-operable via CLI + Hosted MCP. Runtime submission and status are invocable-action driven. Anything that still needs the browser gets a thin wrapper before we rely on it in an agentic workflow — no silent browser automation in production paths.
+## Agent playbook
+
+1. Create a row in the coverage table for the requested operation.
+2. Attach an official URL and exact API name, or label it `Unverified`.
+3. Run object describe and a read-only query.
+4. For write operations, create sandbox fixtures and rollback instructions.
+5. Prefer CLI deployment for source metadata, documented data migration for configuration records, and MCP only over approved actions.
+6. Update this matrix when a Salesforce release changes reachability.
+
+## Guardrails & anti-patterns
+
+- Do not invent field API names, status values, permission-set names, or endpoints.
+- Do not write directly to production from an agent session. Generate a diff, validate in a sandbox, and require human approval.
+- Do not bypass sharing, CRUD, or field-level security in Apex wrappers.
+- Do not treat a UI label as an API name. Confirm with object describe, retrieved metadata, or the target-org schema.
+- Do not mark downstream fulfillment successful merely because an asynchronous message was accepted.
+- Do not classify an object as Tooling API just because it is design-time.
+- Do not classify a UI page as a supported API.
+- Do not convert a read-only diagnostic UI into an undocumented mutation path.
+
+## Verification & tests
+
+1. Run static checks and Apex tests.
+2. Validate the deployment with `sf project deploy start --dry-run --test-level RunLocalTests`.
+3. Submit a synthetic, non-production order and inspect decomposition, fulfillment lines, plan, steps, and fallout.
+4. Repeat the request with the same correlation/idempotency key and verify no duplicate external effect.
+5. Exercise a negative path and confirm the failure is visible and recoverable.
+6. Record API version, object describe output, permission context, and command transcript for each “Verified” row.
+
+## References
+
+- [Dynamic Revenue Orchestrator Standard Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm)
+- [Dynamic Revenue Orchestrator Objects Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm)
+- [Dynamic Revenue Orchestrator Additional Deployment Information](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm)
+- [DRO Standard Invocable Actions](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm)
+- [Build Custom MCP Servers](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html)
+- [Salesforce CLI project deploy start](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)
+- [Monitor Decomposition During Fulfillment](https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5)
+
+**Retrieval keywords:** interface coverage, CLI, SOQL, Data API, Metadata API, Hosted MCP, invocable action, UI gap, reachability

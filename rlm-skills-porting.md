@@ -1,57 +1,98 @@
-# Porting RLM Skills to Claude Format
+---
+title: "Porting RLM Skills to CLI Agent Format"
+description: "Port selected schema and procedure skills into a consistent SKILL.md package without importing stale org assumptions."
+agent_use: "Load when converting a third-party Cursor/Claude/Codex skill for this project."
+salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Salesforce Platform"]
+related: ["agentic-skills-inventory", "external-agentic-skills", "agentic-skills-gap-analysis"]
+last_reviewed: 2026-09-09
+sources: ["https://github.com/forcedotcom/sf-skills", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://github.com/lu-zhengda/skill-port"]
+---
 
-Assessment of porting bgaldino/rlm-base-dev (and similar RLM skills) into Claude Code `SKILL.md` format, including effort, risk, and recommendation. Claude Code is the preferred harness; Cursor is not in scope.
+## Purpose
 
-## Short answer
+Port selectively: schema grounding and generic skill mechanics first; keep proprietary decomposition, entitlement, OCI, and Nexus logic in custom project skills.
 
-**Yes, worth doing — but as a selective port, not a bulk conversion.** The skills are already plain markdown with no editor-specific dependencies, so the mechanical port is cheap. The value is in the schema grounding and skill-authoring patterns, not in the CCI/SFDMU-specific procedures.
+## When to use this doc (agent trigger conditions)
 
-## Why it is feasible
+- “Port this RLM skill.”
+- “Convert Cursor rules to SKILL.md.”
+- “Strip CCI/SFDMU assumptions.”
+- “Add evals and triggers.”
 
-- rlm-base-dev skills explicitly state they are consumable by Cursor, Claude Code, Copilot, Codex, Windsurf, Aider — "plain markdown files... no Cursor-specific dependencies."
-- They live under `.cursor/skills/` for historical reasons only.
-- skill-authoring even documents a `.claude/skill-manifest.yml` registration path.
-- Tooling exists: `lu-zhengda/skill-port` converts between Cursor, Claude Code, and Codex formats while preserving unknown frontmatter and non-skill files.
-- Cursor-to-Claude conversion is mostly: add YAML frontmatter (`name`, `description` with trigger phrases), ensure folder name matches `name`, drop or ignore `.mdc` Cursor rules (they are supplemental; canonical guidance stays in the skill).
+## Key concepts
 
-## What ports cleanly
+- **Mechanical port:** format/frontmatter conversion.
+- **Semantic port:** API, release, and workflow revalidation.
+- **Harness-neutral skill:** commands and references do not assume one editor.
+- **Canonical taxonomy:** use the six names in [Skills Inventory](./agentic-skills-inventory.md).
 
-| Source skill | Port value | Effort |
-|---|---|---|
-| `revenue-cloud-data-model` (+ `domains/dro.md`) | High — object map, relationships, query patterns | Low (add frontmatter, trigger phrases) |
-| `skill-authoring` | High — lifecycle, registration, progressive disclosure | Low |
-| `revenue-cloud-docs` | Medium — Help grounding | Low |
-| `rlm-business-apis` | Medium — REST API usage | Low-Medium |
-| `expression-sets` | Medium — step-graph CRUD patterns (adapt, don't copy) | Medium (strip CCI assumptions) |
+## Data model & objects
 
-## What does not port well or is low value
+Any ported schema content must be checked against the [official object reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm) and a target-org describe. Remove fields or objects that cannot be verified.
 
-- CCI orchestration, SFDMU data plans, Robot Framework, PDE org build, UX assembly — these assume a CumulusCI/QuantumBit repo layout and scripts that won't exist in our environment.
-- Pricing-wiring, constraint-models, decision-tables — adjacent to RCA but outside our DRO/container scope for now.
-- Anything hardcoding instance names (QB-*, RLM_*) — port the mechanism, not the names.
+## Flow / sequence
 
-## Recommended porting approach
+1. Pin source commit and license.
+2. Inventory files, scripts, hooks, and dependencies.
+3. Convert frontmatter and directory layout.
+4. Rewrite triggers to canonical names.
+5. Replace org-specific commands with `sf` CLI parameters.
+6. Revalidate every Salesforce API claim.
+7. Add evals and run without the source editor.
 
-1. **Select, don't bulk-convert.** Start with data-model, skill-authoring, and revenue-cloud-docs. Use `skill-port` for the mechanical frontmatter pass, then hand-edit descriptions for our trigger vocabulary.
-2. **Rewrite descriptions for Claude.** Claude relies on description matching. Add phrases like "use when validating DRO decomposition" or "use when authoring a fulfillment step."
-3. **Strip CCI/SFDMU assumptions.** Replace "run this CCI task" with "query the org via MCP/Tooling API" or "read the local metadata." Keep the object knowledge; drop the build-system coupling.
-4. **Add our proprietary layers on top.** Ported skills become the schema foundation. Custom skills (decomposition validator, entitlement auditor, OCI sync, wrapper author) sit above them and own the hundred-image, OCI-label, Sonatype logic.
-5. **Register in both indexes.** Update `.claude/skills` discovery and our `index.md` / `agentic-skills-inventory.md` so Claude routes correctly.
-6. **Test non-Cursor consumption.** Open each ported skill as plain markdown and confirm a Claude session can follow it without Cursor context.
+## APIs & extension points
 
-## Effort estimate
+Use the documented object APIs only after confirming availability in the target org and API version. Query schema first; do not infer fields from labels.
 
-- Mechanical port of 3-5 core skills: a few hours with `skill-port` + description edits.
-- Adaptation (strip CCI, add triggers, register): 1-2 days.
-- Full library port: not recommended — low ROI, high maintenance, and most skills are out of scope.
+```bash
+sf org display --target-org "$ORG_ALIAS"
+sf data query --target-org "$ORG_ALIAS" --query "SELECT Id FROM FulfillmentPlan LIMIT 1" --json
+sf apex run test --target-org "$ORG_ALIAS" --test-level RunLocalTests --wait 30 --result-format json
+sf project deploy start --target-org "$ORG_ALIAS" --source-dir force-app --dry-run --test-level RunLocalTests
+```
 
-## Risks
+`sf project deploy start --dry-run` validates without saving; use `sf project deploy validate` when a validation job and later quick deploy are required ([Salesforce CLI](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)).
+Use `npx skills add forcedotcom/sf-skills` only as documented by the official repository; third-party conversion tools remain unverified until pinned and reviewed.
 
-- **Stale schema.** rlm-base-dev is pinned to Release 262 / API v67. Re-verify object fields against our org before relying on them.
-- **Silent format drift.** Some skills use Cursor-only fields (`globs`, `alwaysApply` in rules). Ignore them; do not let them leak into SKILL.md frontmatter.
-- **Over-trusting public procedures.** Public skills encode generic Salesforce patterns. Our entitlement JSON, OCI labels, and Nexus isolation are not in them — do not assume coverage.
-- **License/attribution.** Confirm the repo license allows internal use and modification before committing ported copies.
+## Configuration & metadata
 
-## Opinion
+Recommended package: `SKILL.md`, `references/official-sources.md`, `evals/cases.jsonl`, and optional scripts with locked dependencies. Preserve attribution and license notices.
 
-Porting is an effective, low-cost way to bootstrap Claude with Revenue Cloud schema literacy and a proven skill-authoring discipline. It is not a substitute for custom DRO skills. Do the selective port, then invest the saved time in the custom validator, auditor, and OCI-sync skills that actually differentiate our design.
+## Agent playbook
+
+1. Produce a port manifest: kept, rewritten, dropped.
+2. Remove CCI, SFDMU, org-name, and API-version assumptions unless they are explicit project requirements.
+3. Add `agent_use`/trigger vocabulary.
+4. Link official Salesforce references.
+5. Add no-org and missing-field failure behavior.
+6. Run evals in the intended harness.
+7. Submit the port through code review.
+
+## Guardrails & anti-patterns
+
+- Do not invent field API names, status values, permission-set names, or endpoints.
+- Do not write directly to production from an agent session. Generate a diff, validate in a sandbox, and require human approval.
+- Do not bypass sharing, CRUD, or field-level security in Apex wrappers.
+- Do not treat a UI label as an API name. Confirm with object describe, retrieved metadata, or the target-org schema.
+- Do not mark downstream fulfillment successful merely because an asynchronous message was accepted.
+- Do not bulk-convert a library with unknown license or scripts.
+- Do not preserve stale API v61-v64 claims as current without target-org checks.
+- Do not rename canonical project skills during a port.
+
+## Verification & tests
+
+1. Lint frontmatter.
+2. Confirm folder name matches skill name.
+3. Run trigger selection tests.
+4. Run golden outputs with and without org access.
+5. Verify all links and command examples.
+6. Diff semantic outputs against the source skill.
+
+## References
+
+- [Salesforce Skills Library](https://github.com/forcedotcom/sf-skills)
+- [Dynamic Revenue Orchestrator Standard Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm)
+- [Salesforce CLI project deploy start](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)
+- Candidate converter: [`lu-zhengda/skill-port`](https://github.com/lu-zhengda/skill-port) (third party; pin and review before use).
+
+**Retrieval keywords:** port skills, SKILL.md, Cursor, Claude Code, Codex, semantic port, trigger, eval, schema grounding

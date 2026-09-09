@@ -1,51 +1,95 @@
-# Agentic Tooling for DRO Efficiency
+---
+title: "Agentic Tooling for DRO Engineering"
+description: "Select Salesforce CLI, official Salesforce skills, Hosted MCP, and project wrappers for efficient, governed agent workflows."
+agent_use: "Load when choosing tools, configuring an agent harness, or reducing unsafe direct-org access."
+salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
+related: ["agentic-skills-inventory", "external-agentic-skills", "interface-coverage", "wrapper-patterns"]
+last_reviewed: 2026-09-09
+sources: ["https://github.com/forcedotcom/sf-skills", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_apex.html"]
+---
 
-Open-source and commercial tools that improve agentic engineering workflows around Dynamic Revenue Orchestrator (DRO). Focused on Claude Code, MCP, and skills that reduce manual catalog and fulfillment work.
+## Purpose
 
-## Top recommendations
+Use a minimal stack: local source + `sf` CLI for change control, official Salesforce skills for platform procedures, Hosted MCP for approved live tools, and custom wrappers only for proven gaps.
 
-### 1. Salesforce Development Plugin for Claude Code (official, free)
-- Install: `/plugin install salesforce-development@claude-plugins-official`
-- Bundles ~40 skills, 3 MCP servers (api-context, metadata-experts, local LSP for Apex/SOQL), specialized agents, and hooks.
-- Auto-detects SFDX projects, enforces deploy safety gates, and routes requests skills → CLI → MCP.
-- Best for: authoring decomposition rules, custom Apex callouts, and metadata for fulfillment plans without leaving the terminal.
-- Source: forcedotcom/sf-skills and Anthropic plugin marketplace.
+## When to use this doc (agent trigger conditions)
 
-### 2. Salesforce Hosted MCP Servers (official, GA)
-- Enable in Setup → External Client Apps. Exposes SOQL, metadata, Flows, invocable actions, and custom Apex as discoverable tools.
-- Lets Claude or any MCP client query fulfillment order line items, read decomposition rules, or invoke your middleware callouts headlessly.
-- Best for: live validation of entitlement JSON against org data and runtime inspection of DRO plans.
-- Pair with a custom MCP server that wraps your audit microservice or Nexus API for end-to-end traces.
+- “Set up Claude Code/Cursor/Codex for DRO.”
+- “Which MCP tools should be exposed?”
+- “How should the agent deploy and test?”
 
-### 3. salesforce-metadata-mcp (community, npm)
-- `npx -y salesforce-metadata-mcp` — 200+ tools including Apex create/test, Flow builder, security scans, and a `cpq` toolset.
-- Useful when the official plugin is too heavy; supports toolset filtering to keep agent context small.
-- Best for: rapid iteration on technical product definitions and attribute mapping expressions.
+## Key concepts
 
-### 4. arohitu/salesforce-revenue-cloud-skills (open source)
-- `npx rcaskills add arohitu/salesforce-revenue-cloud-skills`
-- Skills for PCM catalog, pricing diagnostics, configurator APIs, and decision tables.
-- Complements the DRO-specific skill from lzdravkov/rlm-skills (already in external-agentic-skills.md).
-- Best for: catalog hygiene and ensuring commercial products stay aligned with technical products.
+- **Authoring plane:** repository and CLI.
+- **Inspection plane:** read-only SOQL/SObject MCP.
+- **Action plane:** explicit invocable/Flow tools.
+- **Progressive disclosure:** expose only tools required for the current task.
 
-### 5. LangGraph or CrewAI (frameworks, for custom agents)
-- LangGraph for stateful, checkpointed workflows that mirror DRO step graphs (compensation, retries, idempotency).
-- CrewAI for role-based crews (catalog agent, fulfillment agent, audit agent) when you need multi-agent review before commit.
-- Best for: building the agentic validation layer described in agentic-dro.md outside Salesforce, then exposing results via MCP.
+## Data model & objects
 
-## Integration pattern
+Tool access should start with describes and least-privilege reads for objects relevant to the task, such as `ProductFulfillmentDecompRule`, `FulfillmentPlan`, and `FulfillmentStep`.
 
-1. Claude Code + Salesforce plugin for authoring and deploying DRO metadata.
-2. Hosted MCP for live org queries during design.
-3. Custom MCP server for Nexus + audit + license system so agents can close the loop on entitlements.
-4. External skills (rlm-skills, revenue-cloud-skills) for domain reasoning without bloating context.
-5. LangGraph only if you need durable, multi-step agent orchestration that Salesforce alone cannot express.
+## Flow / sequence
 
-## What to avoid
+1. Agent edits source locally.
+2. CLI runs lint/tests and dry-run deployment.
+3. Read-only MCP/SOQL verifies org state.
+4. Approved invocable tool performs a bounded action if required.
+5. Agent records evidence in the PR.
 
-- Generic agent frameworks (OpenClaw, etc.) without Salesforce connectors — they lack field-level security and governor awareness.
-- Loading every MCP tool at once — use toolsets or progressive disclosure to prevent context rot.
-- Letting agents write production decomposition rules without the Decomposition Viewer gate.
+## APIs & extension points
 
-## Keywords
-agentic tooling, Claude Code plugin, MCP server, Salesforce skills, LangGraph, CrewAI, headless development, fulfillment validation
+Use the documented object APIs only after confirming availability in the target org and API version. Query schema first; do not infer fields from labels.
+
+```bash
+sf org display --target-org "$ORG_ALIAS"
+sf data query --target-org "$ORG_ALIAS" --query "SELECT Id FROM FulfillmentPlan LIMIT 1" --json
+sf apex run test --target-org "$ORG_ALIAS" --test-level RunLocalTests --wait 30 --result-format json
+sf project deploy start --target-org "$ORG_ALIAS" --source-dir force-app --dry-run --test-level RunLocalTests
+```
+
+`sf project deploy start --dry-run` validates without saving; use `sf project deploy validate` when a validation job and later quick deploy are required ([Salesforce CLI](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)).
+Hosted MCP custom servers can combine SObject tools, Flow, and Apex invocable actions and are deployable through Metadata API ([Salesforce Developers](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html)).
+
+## Configuration & metadata
+
+Configure org aliases outside source control. Scope MCP servers to personas. Require `global @InvocableMethod` for Apex-backed Hosted MCP tools. Pin skill repository versions.
+
+## Agent playbook
+
+1. Detect an `sfdx-project.json`.
+2. Load the official platform skill plus one DRO domain skill.
+3. Authenticate with approved org alias; never print tokens.
+4. Retrieve/describe before editing.
+5. Run unit tests and dry-run deploy.
+6. Query runtime state read-only.
+7. Require approval for writes or submission.
+
+## Guardrails & anti-patterns
+
+- Do not invent field API names, status values, permission-set names, or endpoints.
+- Do not write directly to production from an agent session. Generate a diff, validate in a sandbox, and require human approval.
+- Do not bypass sharing, CRUD, or field-level security in Apex wrappers.
+- Do not treat a UI label as an API name. Confirm with object describe, retrieved metadata, or the target-org schema.
+- Do not mark downstream fulfillment successful merely because an asynchronous message was accepted.
+- Do not load hundreds of irrelevant MCP tools.
+- Do not rely on generic agent frameworks for Salesforce authorization semantics.
+- Do not expose destructive tools to a general-purpose persona.
+
+## Verification & tests
+
+1. Verify CLI and plugin versions.
+2. Test least-privilege read and denied write.
+3. Run Apex tests and deployment validation.
+4. Confirm MCP tool schema matches invocable DTOs.
+5. Run an audit test for every mutating call.
+
+## References
+
+- [Salesforce Skills Library](https://github.com/forcedotcom/sf-skills)
+- [Build Custom MCP Servers](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html)
+- [Hosted MCP Invocable Actions](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html)
+- [Salesforce CLI project deploy start](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)
+- [Salesforce CLI Apex Commands](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_apex.html)
+
+**Retrieval keywords:** agent tooling, Salesforce CLI, sf-skills, Hosted MCP, Claude Code, Cursor, Codex, progressive disclosure
