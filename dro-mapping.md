@@ -30,17 +30,19 @@ Design and review deterministic decomposition from a commercial `Product2` into 
 
 ## Data model & objects
 
+All of the objects below are standard SObjects with the full `create()`/`update()`/`upsert()`/`query()` supported-call set, so agents read and write them through the **Data API** (see [Interface Coverage](./interface-coverage.md)).
+
 | API name | Use | Verified relationship / constraint |
 |---|---|---|
-| `Product2` | Commercial or technical product | `ProductFulfillmentDecompRule.ProductId` requires an existing product. |
-| `ProductFulfillmentDecompRule` | Design-time decomposition rule | `ConditionData` relates to `ExecuteOnRule`. |
-| `ProductDecompEnrichmentRule` | Mapping/enrichment child | References `AttributeDefinition`; source-org IDs can become invalid after migration. |
+| `Product2` | Commercial or technical product | `ProductFulfillmentDecompRule.Product2Id` requires an existing product. |
+| `ProductFulfillmentDecompRule` | Design-time decomposition rule | Deployment sequence 1 in the decomposition group; lookups: `Ruleset`, `Product2`, `ProductClassification`. Condition data must be written via UPDATE after an empty INSERT. |
+| `ProductDecompEnrichmentRule` | Mapping/enrichment child | Parent-child to `ProductFulfillmentDecompRule` via `DecompositionRuleId`. `CalculationMethod` valid values: `Ad-verbatim`, `Static-Lookup`. `RuleEnforcement` (API v63+): `AllFulfillmentRequests`, `InitialFulfillmentRequest`. `SourceType`/`DestinationType`: `Attribute`, `Field`. |
 | `ProdtDecompEnrchVarMap` | Expression-variable mapping | Available in API v64.0 and later. |
-| `ValTfrm`, `ValTfrmGrp` | Value transformation | Used for field/attribute mapping. |
-| `FulfillmentLineSourceRel` | Runtime provenance | Links a fulfillment order line to its decomposition source. |
-| `FulfillmentLineAttribute` | Runtime mapped value | Represents an attribute of a fulfillment order line. |
+| `ValTfrm`, `ValTfrmGrp` | Value transformation | Deployment sequence 2–3 alongside decomposition rules. |
+| `FulfillmentLineSourceRel` | Runtime provenance | Links `FulfillmentOrderLineItem` to its source. `SupplementalAction` (v62+): `Add`, `Amend`, `Cancel`, `NoChange`. `SourceType`: `SourceBundleRoot`, `SourceLineItem`. |
+| `FulfillmentLineAttribute` | Runtime mapped value | Fields: `AttributeDefinitionId`, `AttributeName`, `AttributePicklistValueId`, `AttributeValue`, `ExternalId`, `FulfillmentOrderLineItemId`. |
 
-These API names and migration constraints are documented in the [DRO object reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm) and [deployment guidance](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm).
+See [DRO object reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm), [Objects Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm), and [Additional Deployment Information](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm).
 
 ## Flow / sequence
 
@@ -71,7 +73,33 @@ sf project deploy start --target-org "$ORG_ALIAS" --source-dir force-app --dry-r
 ```
 
 `sf project deploy start --dry-run` validates without saving; use `sf project deploy validate` when a validation job and later quick deploy are required ([Salesforce CLI](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)).
-For migration with condition data, Salesforce documents an insert-then-update sequence: insert the rule with an empty condition, then update `ConditionData`; rule-set references aren’t created on insert ([deployment guidance](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm)).
+
+### Data-migration order (verbatim from the [Objects Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm))
+
+Decomposition family, in order:
+
+1. `ProductFulfillmentDecompRule`
+2. `ValTfrmGrp`
+3. `ValTfrm`
+4. `ProductDecompEnrichmentRule`
+5. `ProdtDecompEnrchVarMap`
+
+### Special-field write pattern (verbatim from [Additional Deployment Information](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm))
+
+- Rule sets: “Rule set references are created in the target org by using UPDATE operation on the JSON fields as listed in the Special Fields section. Any rule set records and references aren’t created on INSERT operation.”
+- Conditions: “You can’t insert a new DRO rule record with condition data. You can only update the record.”
+- Enrichment identifiers: “refresh identifier fields by saving the records again, or set the identifier fields to null during migration.”
+
+```bash
+# Two-phase decomposition-rule import.
+sf data create record --target-org "$ORG_ALIAS" \
+  --sobject ProductFulfillmentDecompRule \
+  --values "Name='SKU-A Decomp' Product2Id=$P2_ID"
+sf data update record --target-org "$ORG_ALIAS" \
+  --sobject ProductFulfillmentDecompRule \
+  --record-id $NEW_ID \
+  --values "ConditionData='<JSON from source org>'"
+```
 
 ## Configuration & metadata
 

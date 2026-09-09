@@ -5,7 +5,7 @@ agent_use: "Load when a required DRO operation lacks a safe CLI/API path or when
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
 related: ["interface-coverage", "agentic-dro", "agentic-tooling", "decomposition-viewer"]
 last_reviewed: 2026-09-09
-sources: ["https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm", "https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html"]
+sources: ["https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm", "https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://help.salesforce.com/s/articleView?id=ind.revenue_cloud_permission_sets_table.htm&language=en_US&type=5"]
 ---
 
 ## Purpose
@@ -29,7 +29,16 @@ Define the canonical wrapper vocabulary for this set: **read adapter**, **valida
 
 ## Data model & objects
 
-Use only APIs confirmed in the target release. Common design-time APIs include `ProductFulfillmentDecompRule`, `FulfillmentStepDefinition`, `FulfillmentStepDependencyDef`, `ProductFulfillmentScenario`, and `FulfillmentTaskAssignmentRule`; runtime inspection includes `FulfillmentPlan`, `FulfillmentStep`, `FulfillmentLineSourceRel`, and `FulfillmentLineAttribute` ([object reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm)).
+Every DRO design-time and runtime entity in the Revenue Cloud Advanced schema is a **standard SObject**. The [Revenue Management developer guide](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm) lists `create()`, `update()`, `upsert()`, `query()`, `retrieve()`, `delete()`, and `undelete()` as supported calls on every object below. Wrappers therefore target the **standard Data API** (REST `/services/data/vXX.X/sobjects/...`, SOAP, or Apex DML). They do not target the Tooling API and they do not target the Metadata API for record data.
+
+| Concern | Design-time objects | Runtime objects |
+|---|---|---|
+| Decomposition | `ProductFulfillmentDecompRule`, `ProductDecompEnrichmentRule`, `ProdtDecompEnrchVarMap`, `ValTfrmGrp`, `ValTfrm` | `FulfillmentLineSourceRel`, `FulfillmentLineAttribute`, `FulfillmentLineRel` |
+| Orchestration | `FulfillmentStepDefinitionGroup`, `FulfillmentStepDefinition`, `FulfillmentStepDependencyDef`, `ProductFulfillmentScenario`, `FulfillmentWorkspace`, `FulfillmentWorkspaceItem` | `FulfillmentPlan`, `FulfillmentStep`, `FulfillmentStepDependency`, `FulfillmentStepSource` |
+| Fallout & SLA | `FulfillmentFalloutRule`, `FulfillmentStepJeopardyRule`, `FulfillmentTaskAssignmentRule` | — |
+| Assets | — | `FulfillmentAsset`, `FulfillmentAssetAttribute`, `FulfillmentAssetRelationship`, `AssetFulfillmentDecomp` |
+
+Only the Setup surface itself (Feature Settings → Dynamic Revenue Orchestrator flags, Context Definition Settings, Fulfillment User selection) is expressed as [DRO metadata types](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm) deployed via Metadata API. Everything a wrapper reads or writes at record level is Data API.
 
 ## Flow / sequence
 
@@ -65,9 +74,34 @@ global with sharing class DroReadAdapterAction {
 }
 ```
 
-Use Named Credentials for Apex callout endpoints rather than embedding URLs or credentials ([Apex guide](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm)). The earlier source’s direct `UserInfo.getSessionId()` Tooling API example is intentionally removed.
+Use Named Credentials for Apex callout endpoints rather than embedding URLs or credentials ([Apex guide](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm)). Never use `UserInfo.getSessionId()` as a bearer token.
 
-> **Unverified:** Salesforce documentation reviewed here does not establish direct Tooling API create/update support for every DRO configuration object. Use the documented data migration sequence or a verified target-org interface; do not assume `/tooling/sobjects/...` works.
+### Design-time write pattern (data-migration wrapper)
+
+When a coding agent must move design-time configuration between orgs, follow the [Additional Deployment Information for DRO](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm) rules. Two must be baked into any wrapper:
+
+1. **Rule-set references need INSERT + UPDATE.** From the guide: “Rule set references are created in the target org by using UPDATE operation on the JSON fields as listed in the Special Fields section. Any rule set records and references aren’t created on INSERT operation.”
+2. **Conditions need INSERT + UPDATE.** “You can’t insert a new DRO rule record with condition data. You can only update the record.” The wrapper must first `create()` the row with an empty condition, then `update()` the condition JSON from the source org.
+
+```apex
+// Sketch of a two-phase write for a decomposition rule.
+ProductFulfillmentDecompRule r = new ProductFulfillmentDecompRule(
+    Name = src.Name,
+    Product2Id = src.Product2Id
+    // NOTE: leave condition/rule-set JSON fields empty here.
+);
+insert r;
+
+ProductFulfillmentDecompRule patch = new ProductFulfillmentDecompRule(
+    Id = r.Id,
+    // Populate the Special-Fields JSON payload copied from the source org here.
+    RuleSetJson__field = src.RuleSetJson__field,
+    ConditionJson__field = src.ConditionJson__field
+);
+update patch;
+```
+
+Enrichment identifier fields (`ProductDecompEnrichmentRule`) must be either re-saved after migration or nulled during migration, per the same page. Wrap this normalization inside the service so agent-generated diffs stay deterministic.
 
 ## Configuration & metadata
 
@@ -117,6 +151,8 @@ Use Named Credentials for Apex callout endpoints rather than embedding URLs or c
 - [Dynamic Revenue Orchestrator Standard Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm)
 - [Dynamic Revenue Orchestrator Objects Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm)
 - [Dynamic Revenue Orchestrator Additional Deployment Information](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm)
+- [Dynamic Revenue Orchestrator Metadata Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm)
+- [Assign Agentforce Revenue Management Permission Sets](https://help.salesforce.com/s/articleView?id=ind.revenue_cloud_permission_sets_table.htm&language=en_US&type=5)
 - [Named Credentials as Callout Endpoints](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm)
 - [Salesforce CLI project deploy start](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)
 

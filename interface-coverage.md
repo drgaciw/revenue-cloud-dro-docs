@@ -5,7 +5,7 @@ agent_use: "Load before promising that an agent can read, write, deploy, submit,
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
 related: ["wrapper-patterns", "agentic-tooling", "decomposition-viewer"]
 last_reviewed: 2026-09-09
-sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5"]
+sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5"]
 ---
 
 ## Purpose
@@ -29,15 +29,20 @@ Prevent plausible but unsupported interface claims. Coverage is release- and org
 
 ## Data model & objects
 
+The DRO schema is entirely composed of **standard SObjects**. Each object listed on [DRO Standard Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm) supports `create()`, `update()`, `upsert()`, `query()`, `retrieve()`, `delete()`, and `undelete()`. Route writes through the **Data API** (REST `/services/data/vXX.X/sobjects/<Name>`, Apex DML, or SOAP), not the Tooling API and not the Metadata API. Metadata API is used only for the DRO Setup surface (feature flags, Context Definition Settings, Fulfillment User selection) documented in the [DRO Metadata deployment reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm).
+
 | Capability | Verified interface | Status |
 |---|---|---|
-| Query DRO standard objects | REST/SOQL after object/field describe | Verified object APIs |
-| Migrate selected design-time objects | Ordered data insert/update per deployment guide | Verified with constraints |
-| Submit order/sales transaction | DRO standard invocable actions | Verified category; exact action APIs require child-page check |
+| Query DRO standard objects | REST/SOQL after object/field describe | Verified |
+| Create/update DRO design-time records | **Data API** (`create()`/`update()`/`upsert()` on the SObject) with the deployment order in [DRO Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm) | Verified |
+| Write rule-set references on `ProductFulfillmentDecompRule` | **Data API UPDATE** on the JSON Special Fields (INSERT does not create the reference) | Verified with constraint |
+| Write decomposition-rule conditions | **Data API INSERT with empty condition, then UPDATE** with the source JSON | Verified with constraint |
+| Deploy DRO Setup / feature flags | Metadata API (`Setup` and `Flag` types in the DRO metadata reference) | Verified |
+| Submit order/sales transaction | DRO standard [invocable actions](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm) | Verified category; look up exact API name for the target release |
 | Expose global Apex invocable action | Hosted MCP custom server | Verified |
 | Deploy custom MCP server | Metadata API | Verified |
-| Reproduce all Decomposition Viewer columns | Not fully documented | Gap |
-| Write arbitrary DRO configuration via Tooling API | Not established | Gap |
+| Reproduce Decomposition Viewer columns programmatically | Query `FulfillmentOrderLineItem`, `FulfillmentLineSourceRel`, `FulfillmentLineAttribute` (see [Decomposition Viewer](./decomposition-viewer.md)) | Verified with constraint |
+| Write arbitrary DRO configuration via Tooling API | Not established anywhere in the reviewed docs; SObject describe lists Data API calls only | Not supported |
 
 ## Flow / sequence
 
@@ -99,6 +104,7 @@ Migration order and lookup dependencies for DRO configuration objects are docume
 - [Dynamic Revenue Orchestrator Standard Objects](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm)
 - [Dynamic Revenue Orchestrator Objects Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_objects.htm)
 - [Dynamic Revenue Orchestrator Additional Deployment Information](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_additional_info.htm)
+- [Dynamic Revenue Orchestrator Metadata Deployment Reference](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/deployment_dynamic_revenue_orchestrator_metadata.htm)
 - [DRO Standard Invocable Actions](https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_invocable_actions_parent.htm)
 - [Build Custom MCP Servers](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html)
 - [Salesforce CLI project deploy start](https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html)
