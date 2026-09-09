@@ -3,7 +3,7 @@ title: "Agentic Skills Inventory and Teaming Model"
 description: "Canonical inventory and capability taxonomy for CLI agents working on RCA/DRO."
 agent_use: "Load when planning, selecting, evaluating, or implementing agent skills for DRO."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Salesforce Platform"]
-related: ["agentic-skills-gap-analysis", "external-agentic-skills", "rlm-skills-porting", "agentic-tooling"]
+related: ["agentic-dro", "agentic-skills-gap-analysis", "agentic-tooling", "external-agentic-skills", "index", "rlm-skills-porting"]
 last_reviewed: 2026-09-09
 sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://github.com/forcedotcom/sf-skills", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html"]
 ---

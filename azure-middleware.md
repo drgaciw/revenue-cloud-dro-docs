@@ -3,7 +3,7 @@ title: "Azure Middleware Integration Pattern"
 description: "Connect DRO callouts to Azure messaging and project services with idempotency, dead-letter handling, ordering where required, and managed identities."
 agent_use: "Load when implementing or reviewing the Salesforce-to-Azure fulfillment boundary."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Azure Event Grid", "Azure Service Bus"]
-related: ["fulfillment-orchestration", "audit-system", "token-auditability", "chaos-testing"]
+related: ["audit-system", "chaos-testing", "fulfillment-orchestration", "licensing", "observability", "token-auditability"]
 last_reviewed: 2026-09-09
 sources: ["https://help.salesforce.com/s/articleView?id=ind.dro_callout.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_callouts_overview.htm", "https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm", "https://learn.microsoft.com/en-us/azure/event-grid/delivery-and-retry", "https://learn.microsoft.com/en-us/azure/service-bus-messaging/advanced-features-overview", "https://learn.microsoft.com/en-us/azure/key-vault/general/authentication"]
 ---

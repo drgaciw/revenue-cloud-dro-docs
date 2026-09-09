@@ -3,7 +3,7 @@ title: "Decomposition Viewer"
 description: "Use the supported read-only viewer and runtime records to validate decomposition output and troubleshoot fallout."
 agent_use: "Load when validating a product launch, diagnosing unexpected fulfillment lines, or designing a headless validation equivalent."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["dro-mapping", "wrapper-patterns", "agentic-dro"]
+related: ["agentic-dro", "dro-mapping", "interface-coverage", "wrapper-patterns"]
 last_reviewed: 2026-09-09
 sources: ["https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5", "https://help.salesforce.com/s/articleView?id=ind.revenue_cloud_permission_sets_table.htm&language=en_US&type=5", "https://help.salesforce.com/s/articleView?id=ind.dro_fulfillment_order_line_item_actions.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/sforce_api_objects_fulfillmentlinesourcerel.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/sforce_api_objects_fulfillmentlineattribute.htm", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html"]
 ---

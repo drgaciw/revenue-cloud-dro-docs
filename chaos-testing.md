@@ -3,7 +3,7 @@ title: "Chaos Testing and Failure Injection"
 description: "Run controlled resilience experiments against the DRO-to-middleware boundary and verify retries, fallout, idempotency, and evidence."
 agent_use: "Load when planning failure injection, resilience tests, game days, or release gates."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["fulfillment-orchestration", "azure-middleware", "audit-system", "observability"]
+related: ["audit-system", "azure-middleware", "fulfillment-orchestration", "nfr-parking-lot", "observability"]
 last_reviewed: 2026-09-09
 sources: ["https://help.salesforce.com/s/articleView?id=ind.dro_callout.htm&language=en_US&type=5", "https://help.salesforce.com/s/articleView?id=ind.dro_fallout_design_and_management.htm&language=en_US&type=5", "https://help.salesforce.com/s/articleView?id=ind.dro_sla_jeopardy_administration.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/atlas.en-us/platform_events.meta/platform_events/platform_event_apex_tests.htm", "https://learn.microsoft.com/en-us/azure/event-grid/delivery-and-retry"]
 ---

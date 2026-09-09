@@ -3,7 +3,7 @@ title: "Observability"
 description: "Build correlation-driven views and alerts spanning DRO runtime state and project middleware without conflating telemetry with audit evidence."
 agent_use: "Load when defining dashboards, logs, metrics, traces, alerts, or SLOs."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["audit-system", "token-auditability", "azure-middleware", "nfr-parking-lot"]
+related: ["audit-system", "azure-middleware", "chaos-testing", "fulfillment-orchestration", "nfr-parking-lot", "token-auditability"]
 last_reviewed: 2026-09-09
 sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://help.salesforce.com/s/articleView?id=ind.dro_sla_jeopardy_administration.htm&language=en_US&type=5", "https://help.salesforce.com/s/articleView?id=ind.dro_fallout_design_and_management.htm&language=en_US&type=5"]
 ---

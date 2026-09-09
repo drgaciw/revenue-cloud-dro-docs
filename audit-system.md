@@ -3,7 +3,7 @@ title: "Audit System"
 description: "Define the project-owned cross-system audit ledger that reconciles Salesforce fulfillment state with downstream entitlement and download evidence."
 agent_use: "Load when designing audit events, reconciliation, correlation IDs, retention, or evidence queries."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Salesforce Platform Events"]
-related: ["token-auditability", "observability", "azure-middleware", "chaos-testing"]
+related: ["amendments-renewals", "azure-middleware", "chaos-testing", "observability", "token-auditability"]
 last_reviewed: 2026-09-09
 sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://help.salesforce.com/s/articleView?id=ind.dro_callout.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/atlas.en-us/platform_events.meta/platform_events/platform_event_apex_tests.htm"]
 ---

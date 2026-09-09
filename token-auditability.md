@@ -3,7 +3,7 @@ title: "Token-Service Auditability"
 description: "Specify auditable token lifecycle and negative-event evidence without storing credential material."
 agent_use: "Load when implementing mint/revoke/deny events, correlation, multi-tenant access evidence, or token incident analysis."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["audit-system", "licensing", "azure-middleware", "observability"]
+related: ["agentic-dro", "audit-system", "azure-middleware", "licensing", "observability"]
 last_reviewed: 2026-09-09
 sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm"]
 ---
