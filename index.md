@@ -3,7 +3,7 @@ title: "RCA/DRO Agent Routing Index"
 description: "Dense retrieval map from task intent and keywords to the smallest relevant DRO document set."
 agent_use: "Load when routing an agent request to one or more topic files; prefer this over loading the full corpus."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["README", "agentic-skills-inventory", "interface-coverage"]
+related: ["README", "agentic-skills-inventory", "dro-claude-code-research", "interface-coverage"]
 last_reviewed: 2026-09-09
 sources: ["https://help.salesforce.com/s/articleView?id=ind.dynamic_revenue_orchestration_essentials.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm"]
 ---
@@ -81,6 +81,7 @@ All routes are relative links and filenames without `.md` appear in frontmatter 
 | audit, system | [audit-system](./audit-system.md) | Cross-system evidence ledger and reconciliation design. |
 | azure, middleware | [azure-middleware](./azure-middleware.md) | Salesforce-to-Azure messaging, idempotency, ordering, and secrets pattern. |
 | chaos, testing | [chaos-testing](./chaos-testing.md) | Controlled failure-injection playbook. |
+| claude, code, research, plugin, mcp | [dro-claude-code-research](./dro-claude-code-research.md) | Steps, best practices, and community experience driving DRO Product Decomposition from Claude Code. |
 | decomposition, viewer | [decomposition-viewer](./decomposition-viewer.md) | Read-only decomposition inspection and headless validation guidance. |
 | dro, mapping | [dro-mapping](./dro-mapping.md) | Commercial-to-technical mapping, rules, and enrichment. |
 | external, agentic, skills | [external-agentic-skills](./external-agentic-skills.md) | Due diligence for official and third-party skill repositories. |
