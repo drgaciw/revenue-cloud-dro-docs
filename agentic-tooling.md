@@ -3,7 +3,7 @@ title: "Agentic Tooling for DRO Engineering"
 description: "Select Salesforce CLI, official Salesforce skills, Hosted MCP, and project wrappers for efficient, governed agent workflows."
 agent_use: "Load when choosing tools, configuring an agent harness, or reducing unsafe direct-org access."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
-related: ["agentic-skills-inventory", "external-agentic-skills", "interface-coverage", "wrapper-patterns"]
+related: ["agentic-skills-inventory", "dro-claude-code-research", "external-agentic-skills", "interface-coverage", "wrapper-patterns"]
 last_reviewed: 2026-09-09
 sources: ["https://github.com/forcedotcom/sf-skills", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/invocable-actions.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_apex.html"]
 ---
