@@ -3,7 +3,7 @@ title: "External Agentic Skills for DRO"
 description: "Evaluate third-party Salesforce/RLM agent skills as accelerators while keeping Salesforce documentation and target-org schema authoritative."
 agent_use: "Load when considering an external repository, install method, license, version pin, or adoption risk."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Salesforce Platform"]
-related: ["agentic-skills-gap-analysis", "agentic-skills-inventory", "agentic-tooling", "dro-claude-code-research", "rlm-skills-porting"]
+related: ["agentic-skills-gap-analysis", "agentic-skills-inventory", "agentic-tooling", "dro-claude-code-research", "dro-rules-management-research", "rlm-skills-porting"]
 last_reviewed: 2026-09-09
 sources: ["https://github.com/forcedotcom/sf-skills", "https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://github.com/lzdravkov/rlm-skills", "https://github.com/bgaldino/rlm-base-dev", "https://github.com/arohitu/salesforce-revenue-cloud-skills", "https://github.com/PranavNagrecha/AwesomeSalesforceSkills", "https://github.com/alexkwitko/Salesforce-Agentforce"]
 ---
