@@ -3,7 +3,7 @@ title: "DRO Product Decomposition in Claude Code"
 description: "Steps, best practices, and community experience for driving Salesforce Dynamic Revenue Orchestrator (DRO) Product Decomposition from Claude Code as the coding-agent CLI."
 agent_use: "Load when a Claude Code (or similar CLI coding agent) task targets DRO Product Decomposition authoring, deployment, run-time verification, or the Salesforce Development plugin / Hosted MCP integration."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator", "Hosted MCP Servers"]
-related: ["agentic-dro", "agentic-tooling", "decomposition-viewer", "dro-mapping", "external-agentic-skills", "wrapper-patterns"]
+related: ["agentic-dro", "agentic-tooling", "decomposition-viewer", "dro-mapping", "dro-rules-management-research", "external-agentic-skills", "wrapper-patterns"]
 last_reviewed: 2026-09-10
 sources:
   - https://help.salesforce.com/s/articleView?id=ind.dro_dynamic_revenue_orchestrator.htm&language=en_US&type=5

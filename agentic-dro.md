@@ -3,7 +3,7 @@ title: "Agentic Interactions with DRO"
 description: "Apply CLI agents to DRO validation and review while preserving deterministic platform execution and human-controlled writes."
 agent_use: "Load for any third-party coding-agent workflow that reads, validates, or proposes DRO configuration."
 salesforce_products: ["Revenue Cloud Advanced", "Dynamic Revenue Orchestrator"]
-related: ["agentic-skills-inventory", "decomposition-viewer", "dro-claude-code-research", "dro-mapping", "token-auditability", "wrapper-patterns"]
+related: ["agentic-skills-inventory", "decomposition-viewer", "dro-claude-code-research", "dro-mapping", "dro-rules-management-research", "token-auditability", "wrapper-patterns"]
 last_reviewed: 2026-09-09
 sources: ["https://developer.salesforce.com/docs/atlas.en-us.revenue_lifecycle_management_dev_guide.meta/revenue_lifecycle_management_dev_guide/dynamic_revenue_orchestrator_std_objects_parent.htm", "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html", "https://help.salesforce.com/s/articleView?id=ind.dro_monitor_decomposition_during_fulfillment.htm&language=en_US&type=5", "https://developer.salesforce.com/docs/platform/salesforce-cli-reference/guide/cli_reference_project_deploy_start.html"]
 ---
